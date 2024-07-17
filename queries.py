@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+import pandas as pd
 
 first_pipeline = [
     {"$match": {"predictions": "anomaly"}},
@@ -34,16 +35,6 @@ third_pipeline = [
 ]
 
 fourth_pipeline = [
-    {
-        "$group": {
-            "_id": "$to_ip",
-            "count": {"$sum": 1}
-        }
-    },
-    {"$sort": {"count": -1}}
-]
-
-fifth_pipeline = [
     {"$match": {"predictions": "normal"}},
     {
         "$group": {
@@ -52,7 +43,16 @@ fifth_pipeline = [
         }
     },
     {"$sort": {"count": -1}},
-    {"$limit": 10}
+]
+
+fifth_pipeline = [
+    {
+        "$group": {
+            "_id": "$to_ip",
+            "count": {"$sum": 1}
+        }
+    },
+    {"$sort": {"count": -1}}
 ]
 
 sixth_pipeline = [
@@ -88,23 +88,29 @@ seventh_pipeline = [
 def execute_request(pipeline, collection):
     return list(collection.aggregate(pipeline))
 
+def display_result(results, sentence):
+    print("\n--------------------------------\n")
+    print(sentence)
+    for result in results:
+        print("IP: " + result["_id"] + ". Number of request: " + str(result["count"]))
+    print("\n--------------------------------\n")
+
+def display_cross_table(results, sentence):
+    print("\n--------------------------------\n")
+    print(sentence)
+    for result in results:
+        print(result["from_ip"] + " -> " + result["to_ip"] + " => "+ str(result["count"]))
+    print("\n--------------------------------\n")
+
 if __name__ == '__main__':
     client = MongoClient('mongodb://localhost:27017/')
     db = client['DataManagement-Project']
     collection = db['AfterTreatment']
 
-    first_result = execute_request(first_pipeline, collection)
-    second_result = execute_request(second_pipeline, collection)
-    third_result = execute_request(third_pipeline, collection)
-    fourth_result = execute_request(fourth_pipeline, collection)
-    fifth_result = execute_request(fifth_pipeline, collection)
-    sixth_result = execute_request(sixth_pipeline, collection)
-    seventh_result = execute_request(seventh_pipeline, collection)
-
-    print("First :", str(first_result))
-    print("\nSecond :", str(second_result))
-    print("\nThird :", str(third_result))
-    print("\nFourth :", str(fourth_result))
-    print("\nFifth :", str(fifth_result))
-    print("\nSixth :", str(sixth_result))
-    print("\nSeventh :", str(seventh_result))
+    display_result(execute_request(first_pipeline, collection), "Number of anomly requests recieved per IP adress :")
+    display_result(execute_request(second_pipeline, collection), "Number of normal requests revieved per IP adress :")
+    display_result(execute_request(third_pipeline, collection), "Number of anomaly requests sent per IP adress :")
+    display_result(execute_request(fourth_pipeline, collection), "Number of normal requests sent per IP adress :")
+    display_result(execute_request(fifth_pipeline, collection), "Number of recieved requests per IP adress :")
+    display_result(execute_request(sixth_pipeline, collection), "Number of requests sent per IP adress :")
+    display_cross_table(execute_request(seventh_pipeline, collection), "Table of requests between IP adresses :")
