@@ -34,16 +34,6 @@ third_pipeline = [
 ]
 
 fourth_pipeline = [
-    {
-        "$group": {
-            "_id": "$to_ip",
-            "count": {"$sum": 1}
-        }
-    },
-    {"$sort": {"count": -1}}
-]
-
-fifth_pipeline = [
     {"$match": {"predictions": "normal"}},
     {
         "$group": {
@@ -53,6 +43,16 @@ fifth_pipeline = [
     },
     {"$sort": {"count": -1}},
     {"$limit": 10}
+]
+
+fifth_pipeline = [
+    {
+        "$group": {
+            "_id": "$to_ip",
+            "count": {"$sum": 1}
+        }
+    },
+    {"$sort": {"count": -1}}
 ]
 
 sixth_pipeline = [
@@ -101,10 +101,10 @@ if __name__ == '__main__':
     sixth_result = execute_request(sixth_pipeline, collection)
     seventh_result = execute_request(seventh_pipeline, collection)
 
-    print("First :", str(first_result))
-    print("\nSecond :", str(second_result))
-    print("\nThird :", str(third_result))
-    print("\nFourth :", str(fourth_result))
-    print("\nFifth :", str(fifth_result))
-    print("\nSixth :", str(sixth_result))
-    print("\nSeventh :", str(seventh_result))
+    print("Number of anomly requests recieved per IP adress :", str(first_result))
+    print("\nNumber of normal requests revieved per IP adress :", str(second_result))
+    print("\nNumber of anomaly requests sent per IP adress :", str(third_result))
+    print("\nNumber of normal requests sent per IP adress :", str(fourth_result))
+    print("\nNumber of recieved requests per IP adress :", str(fifth_result))
+    print("\nNumber of requests sent per IP adress :", str(sixth_result))
+    print("\nTable of requests between IP adresses :", str(seventh_result))
