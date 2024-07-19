@@ -1,5 +1,4 @@
 from pymongo import MongoClient
-import pandas as pd
 
 first_pipeline = [
     {"$match": {"predictions": "anomaly"}},
