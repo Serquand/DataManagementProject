@@ -71,7 +71,7 @@ Ensure you have the following installed on your machine:
 
 1. **Install Git**:
 
-   - **Windows**: Windows: Download and install Git from the [official website](https://git-scm.com/download/win).
+   - **Windows**: Download and install Git from the [official website](https://git-scm.com/download/win).
 
    - **Mac**: Install via Homebrew:
      ```sh
