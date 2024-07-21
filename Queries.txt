@@ -1,0 +1,132 @@
+db.AfterTreatment.aggregate([
+  {
+    "$group": {
+      "_id": {
+        "predictions": "$predictions",
+        "protocol_type": "$protocol_type",
+        "service": "$service",
+        "flag": "$flag"
+      },
+      "count": { "$sum": 1 }
+    }
+  },
+  { "$sort": { "count": -1 } },
+  { "$group": { "_id": "$_id.predictions", "most_common": { "$first": { "protocol_type": "$_id.protocol_type", "service": "$_id.service", "flag": "$_id.flag", "count": "$count" } } } },
+  { "$replaceRoot": { "newRoot": { "predictions": "$_id", "protocol_type": "$most_common.protocol_type", "service": "$most_common.service", "flag": "$most_common.flag", "count": "$most_common.count" } } }
+]);
+
+db.AfterTreatment.aggregate([
+  {
+    $group: {
+      _id: "$from_ip",
+      count: { $sum: 1 }
+    }
+  },
+  {
+    $sort: { count: -1 }
+  }
+])
+
+db.AfterTreatment.aggregate([
+  {
+    $group: {
+      _id: "$to_ip",
+      count: { $sum: 1 }
+    }
+  },
+  {
+    $sort: { count: -1 }
+  }
+])
+
+db.AfterTreatment.aggregate([
+  {
+      $match: { predictions: "anomaly" }  // Filtre les documents où predictions est "anormal"
+  },
+  {
+      $group: {
+          _id: "$from_ip",  // Groupe par from_ip
+          count: { $sum: 1 }  // Compte le nombre d'occurrences pour chaque from_ip
+      }
+  },
+  {
+      $sort: { count: -1 }  // Trie par nombre décroissant
+  },
+  {
+      $limit: 10  // Limite les résultats aux 10 from_ip les plus fréquentes (optionnel)
+  }
+])
+
+db.AfterTreatment.aggregate([
+  {
+      $match: { predictions: "normal" }  // Filtre les documents où predictions est "anormal"
+  },
+  {
+      $group: {
+          _id: "$from_ip",  // Groupe par from_ip
+          count: { $sum: 1 }  // Compte le nombre d'occurrences pour chaque from_ip
+      }
+  },
+  {
+      $sort: { count: -1 }  // Trie par nombre décroissant
+  },
+  {
+      $limit: 10  // Limite les résultats aux 10 from_ip les plus fréquentes (optionnel)
+  }
+])
+
+db.AfterTreatment.aggregate([
+  {
+      $match: { predictions: "anomaly" }  // Filtre les documents où predictions est "anormal"
+  },
+  {
+      $group: {
+          _id: "$to_ip",  // Groupe par from_ip
+          count: { $sum: 1 }  // Compte le nombre d'occurrences pour chaque from_ip
+      }
+  },
+  {
+      $sort: { count: -1 }  // Trie par nombre décroissant
+  },
+  {
+      $limit: 10  // Limite les résultats aux 10 from_ip les plus fréquentes (optionnel)
+  }
+])
+
+db.AfterTreatment.aggregate([
+  {
+      $match: { predictions: "normal" }  // Filtre les documents où predictions est "anormal"
+  },
+  {
+      $group: {
+          _id: "$to_ip",  // Groupe par from_ip
+          count: { $sum: 1 }  // Compte le nombre d'occurrences pour chaque from_ip
+      }
+  },
+  {
+      $sort: { count: -1 }  // Trie par nombre décroissant
+  },
+  {
+      $limit: 10  // Limite les résultats aux 10 from_ip les plus fréquentes (optionnel)
+  }
+])
+
+db.AfterTreatment.aggregate([
+  {
+      $group: {
+          _id: { from_ip: "$from_ip", to_ip: "$to_ip" },
+          count: { $sum: 1 }
+      }
+  },
+  {
+      $project: {
+          _id: 0,
+          from_ip: "$_id.from_ip",
+          to_ip: "$_id.to_ip",
+          count: "$count"
+      }
+  },
+  {
+      $sort: { count: -1 }
+  }
+])

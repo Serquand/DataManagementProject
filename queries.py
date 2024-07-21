@@ -42,7 +42,6 @@ fourth_pipeline = [
         }
     },
     {"$sort": {"count": -1}},
-    {"$limit": 10}
 ]
 
 fifth_pipeline = [
@@ -88,23 +87,29 @@ seventh_pipeline = [
 def execute_request(pipeline, collection):
     return list(collection.aggregate(pipeline))
 
+def display_result(results, sentence):
+    print("\n--------------------------------\n")
+    print(sentence)
+    for result in results:
+        print("IP: " + result["_id"] + ". Number of request: " + str(result["count"]))
+    print("\n--------------------------------\n")
+
+def display_cross_table(results, sentence):
+    print("\n--------------------------------\n")
+    print(sentence)
+    for result in results:
+        print(result["from_ip"] + " -> " + result["to_ip"] + " => "+ str(result["count"]))
+    print("\n--------------------------------\n")
+
 if __name__ == '__main__':
     client = MongoClient('mongodb://localhost:27017/')
     db = client['DataManagement-Project']
     collection = db['AfterTreatment']
 
-    first_result = execute_request(first_pipeline, collection)
-    second_result = execute_request(second_pipeline, collection)
-    third_result = execute_request(third_pipeline, collection)
-    fourth_result = execute_request(fourth_pipeline, collection)
-    fifth_result = execute_request(fifth_pipeline, collection)
-    sixth_result = execute_request(sixth_pipeline, collection)
-    seventh_result = execute_request(seventh_pipeline, collection)
-
-    print("Number of anomly requests recieved per IP adress :", str(first_result))
-    print("\nNumber of normal requests revieved per IP adress :", str(second_result))
-    print("\nNumber of anomaly requests sent per IP adress :", str(third_result))
-    print("\nNumber of normal requests sent per IP adress :", str(fourth_result))
-    print("\nNumber of recieved requests per IP adress :", str(fifth_result))
-    print("\nNumber of requests sent per IP adress :", str(sixth_result))
-    print("\nTable of requests between IP adresses :", str(seventh_result))
+    display_result(execute_request(first_pipeline, collection), "Number of anomly requests recieved per IP adress :")
+    display_result(execute_request(second_pipeline, collection), "Number of normal requests revieved per IP adress :")
+    display_result(execute_request(third_pipeline, collection), "Number of anomaly requests sent per IP adress :")
+    display_result(execute_request(fourth_pipeline, collection), "Number of normal requests sent per IP adress :")
+    display_result(execute_request(fifth_pipeline, collection), "Number of recieved requests per IP adress :")
+    display_result(execute_request(sixth_pipeline, collection), "Number of requests sent per IP adress :")
+    display_cross_table(execute_request(seventh_pipeline, collection), "Table of requests between IP adresses :")
